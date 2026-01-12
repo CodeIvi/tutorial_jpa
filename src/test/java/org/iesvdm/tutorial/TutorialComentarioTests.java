@@ -16,6 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * TEST ONETOMANY ORPHANREMOVAL, CASCADE.ALL, LAZY
@@ -42,12 +43,19 @@ public class TutorialComentarioTests {
     @Test
     @Order(0)
     void pruebaFetchLazyEager() {
+        transactionTemplate.execute(status -> {
+            Tutorial tutorial = tutorialRepository.save(Tutorial.builder()
+                    .titulo("Título 1")
+                    .comentarios(new HashSet<>())
+                    .build());
 
-        Tutorial tutorial = tutorialRepository.save(Tutorial.builder()
-                                                        .titulo("Título 1")
-                                                        .build());
+            Tutorial tutorial2 = tutorialRepository.findById(tutorial.getId()).orElse(null);
+            System.out.println(tutorial2);
+            return null;
 
-        Tutorial tutorial2 = tutorialRepository.findById(tutorial.getId()).orElse(null);
+        });
+
+
 
 
     }
@@ -122,6 +130,7 @@ public class TutorialComentarioTests {
         System.out.println("Comentario a ACTUALIZAR: " + comentarioAActualizar);
 
         comentarioAActualizar.setTexto("EH Comentario Tutorial 1 Actualizado!!!!!!");
+        comentarioRepository.save(comentarioAActualizar);
 
         tutorialRepository.save(tutorial);
 
@@ -240,4 +249,23 @@ public class TutorialComentarioTests {
 
     }
 
+    @Test
+    @Order(8)
+    public void borraraTodosLosHijos(){
+        transactionTemplate.execute(status -> {
+        Tutorial tutorial = tutorialRepository.findById(3L).orElse(null);
+        //Para poder borrar con orphanRemoval es necesario si o si desvincular Al padre de los hijos
+            // Poniendo los tutoriales como null y eliminar los comentarios.
+            //posiblemente sea necesario crear una nueva lista set para hacer que funcione.
+        tutorial.getComentarios().forEach(c-> c.setTutorial(null));
+        Set<Comentario> setAux = new HashSet<Comentario>(tutorial.getComentarios());
+        tutorial.getComentarios().clear();
+
+        setAux.forEach(c -> {
+        comentarioRepository.delete(c);
+        });
+        return null;
+        });
+
+    }
 }
