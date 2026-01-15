@@ -128,7 +128,7 @@ public class PeliculaIdiomaTests {
             idioma1.getPeliculas().forEach(pelicula -> {//pelicula.setIdioma(null);
                 peliculaRepository.delete(pelicula);
             });
-
+         idioma1.getPeliculas().clear();
             //ESTE 2o FIND HAY QUE HACERLO
         //idioma1 = idiomaRepository.findById(1L).orElse(null);
         idiomaRepository.delete(idioma1);

@@ -35,6 +35,7 @@ public class TagPostTests {
     @Autowired
     private PlatformTransactionManager transactionManager;
     private TransactionTemplate transactionTemplate;
+
     @BeforeEach
     public void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
@@ -47,7 +48,7 @@ public class TagPostTests {
         Tag tag1 = new Tag(null, "Programación", new HashSet<>());
         Tag tag2 = new Tag(null, "Base de datos", new HashSet<>());
 
-        Post post1 = new Post(null, "Post1 - Programando fácil con JPA :P",new HashSet<>());
+        Post post1 = new Post(null, "Post1 - Programando fácil con JPA :P", new HashSet<>());
 
         post1.addTag(tag1);
         //RECUERDA QUE LA COLECCIÓN DE TAGS ES UN SET Y NO PUEDE HABER REPETIDOS CON EL
@@ -79,13 +80,12 @@ public class TagPostTests {
 //                .setParameter("id", post2.getId())
 //                .getResultList();
 //        post2.setTags(new HashSet<>(tags));
-        UtilJPA.initializeLazyManyToManyByJoinFetch(entityManager,
-                Tag.class,
-                Post.class,
-                post2.getId(),
-                post2::setTags
-        );
-        //
+//        UtilJPA.initializeLazyManyToManyByJoinFetch(entityManager,
+//                Tag.class,
+//                Post.class,
+//                post2.getId(),
+//                post2::setTags
+//        );
 
         Tag tag1 = tagRepository.findById(1L).orElse(null);
         //Si se utlizas un fetch LAZY, mejor estrategia realizar un join fetch en JPQL
@@ -179,4 +179,26 @@ public class TagPostTests {
 
     }
 
+    @Test
+    @Order(5)
+    void grabarPostQueYaExiste() {
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+
+
+            Tag tag4 = new Tag(null, "EEEH Tag 3!!!!", new HashSet<>());
+            tagRepository.save(tag4);
+
+            Post post3 = new Post(null, "Post2 - NO programando tan fácilmente...", new HashSet<>());
+            postRepository.save(post3);
+
+            Post post1 = postRepository.findById(1L).orElse(null);
+
+            tag4.addPost(post3);
+            tag4.addPost(post1);
+            tagRepository.save(tag4);
+        });
+
+    }
 }
+
+

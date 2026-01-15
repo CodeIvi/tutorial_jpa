@@ -43,6 +43,8 @@ public class TutorialComentarioTests {
     @Test
     @Order(0)
     void pruebaFetchLazyEager() {
+        //¿Por qué? la colección comenatrios @OneToMany es un fecth LAZY, sin transacción no lanza la query para
+        // cargar los elementos de la colección.
         transactionTemplate.execute(status -> {
             Tutorial tutorial = tutorialRepository.save(Tutorial.builder()
                     .titulo("Título 1")
